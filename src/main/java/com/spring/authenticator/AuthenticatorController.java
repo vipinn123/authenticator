@@ -48,6 +48,8 @@ public class AuthenticatorController {
 		
 		
 		logger.info("Entering /login");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("DD MM YYY - HH:mm:ss");
+		System.out.println("The time is now :" + dateFormat.format(new Date()));
 		if(status.equalsIgnoreCase("success") && accessToken.getAccessToken() == null) {
 			
 			//TODO : Get request token from request parameter to generate session
