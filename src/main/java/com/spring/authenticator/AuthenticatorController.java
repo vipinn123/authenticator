@@ -97,7 +97,7 @@ public class AuthenticatorController {
 		return status;
 	  }
 	
-	@Scheduled(cron="0 20 30 * * MON-FRI",zone="IST")
+	@Scheduled(cron="0 28 20 * * MON-FRI",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void ticker() throws KiteException {
 		
