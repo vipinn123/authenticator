@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -27,9 +28,16 @@ public class AuthenticatorSpringApplication {
         application.setAdditionalProfiles("ssl");
         application.run(args);
 		
-		
-		
+        
 		logger.info("Authenticator Application Started");
+	}
+	
+	//@KafkaListener(topics = "tickdata", groupId = "full-read")
+	public void listen(String message) {
+		
+		logger.info("Received Messasge in group - full-read: " + message);
+		System.out.println(message);
+	
 	}
 	
 	

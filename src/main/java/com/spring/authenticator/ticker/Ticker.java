@@ -5,7 +5,17 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+
 import com.google.gson.Gson;
+import com.spring.authenticator.AuthenticatorSpringApplication;
 import com.zerodhatech.kiteconnect.kitehttp.exceptions.KiteException;
 import com.zerodhatech.models.Tick;
 import com.zerodhatech.ticker.KiteTicker;
@@ -13,13 +23,45 @@ import com.zerodhatech.ticker.OnConnect;
 import com.zerodhatech.ticker.OnDisconnect;
 import com.zerodhatech.ticker.OnTicks;
 
+
 public class Ticker {
+	
+	private static Logger logger = LoggerFactory.getLogger(Ticker.class);
 	
 	public Ticker() {
 		
 	}
 	
+	@Autowired
+	private KafkaTemplate<String, String> kafkaTemplate;
+	 
+	public void sendMessage(String message) {
+		logger.info("In Ticker.senMessage()");
+		
+		ListenableFuture<SendResult<String, String>> future = 
+			      this.kafkaTemplate.send("luckyv", message);
+			     
+			    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+			 
+			        @Override
+			        public void onSuccess(SendResult<String, String> result) {
+			            System.out.println("Sent message=[" + message + 
+			              "] with offset=[" + result.getRecordMetadata().offset() + "]");
+			        }
+			        @Override
+			        public void onFailure(Throwable ex) {
+			            System.out.println("Unable to send message=["
+			              + message + "] due to : " + ex.getMessage());
+			        }
+			    });
+			    
+		//kafkaTemplate.send("tickdata", msg);
+		logger.info("Exiting Ticker.senMessage()");
+	}
+	
 	public void startTicker(String accessToken, String apiKey) throws KiteException {
+		
+		logger.info("Entering Ticker.startTicker()");
 		
 		ArrayList<Long> tokens = Tokens.getDefaultTokens();
 		
@@ -49,71 +91,36 @@ public class Ticker {
         });
 
         tickerProvider.setOnTickerArrivalListener(new OnTicks() {
-            @Override
+            
+        	@Override
             public void onTicks(ArrayList<Tick> ticks) {
-            	//CustomKafkaProducer producer = new CustomKafkaProducer();
-                NumberFormat formatter = new DecimalFormat();
-                System.out.println("ticks size "+ticks.size());
+                
+                logger.info("Ticks recieved : "+ticks.size());
+
                 if(ticks.size() > 0) {
-                	
-                    
-                    
-                    Iterator<Tick> iterator = ticks.iterator();
-                    
-                    
+ 
+                	Iterator<Tick> iterator = ticks.iterator();
                     String tickJson = new Gson().toJson(ticks.get(1));
-                    
-                    System.out.println("********************************************************");
-                    System.out.println(tickJson);
-                    System.out.println("********************************************************");
-                    
+                    logger.info(tickJson);
+
                     while(iterator.hasNext()) {
                     	
-                    	
-                    	//producer.sendTick(tick);
-                    	
+                    	//Ticker.sendMessage(new Gson().toJson(iterator.next()));
+                    	kafkaTemplate.send("tickdata",new Gson().toJson(iterator.next()));
+
                     }
-                    
-                    //producer.close();
-                    	
                     		
                 }
             }
-
-			
         });
-
-
-      
-
         
         tickerProvider.setTryReconnection(true);
-        
-        //maximum retries and should be greater than 0
         tickerProvider.setMaximumRetries(10);
-        
-        //set maximum retry interval in seconds
         tickerProvider.setMaximumRetryInterval(30);
 
         /** connects to com.zerodhatech.com.zerodhatech.ticker server for getting live quotes*/
         tickerProvider.connect();
 
-        /** You can check, if websocket connection is open or not using the following method.*/
-        boolean isConnected = tickerProvider.isConnectionOpen();
-        System.out.println(isConnected);
-
-        
-        /**
-         * 
-         */
-        //System.out.println(tickerProvider.)
-
-        /** set mode is used to set mode in which you need tick for list of tokens.
-         * Ticker allows three modes, modeFull, modeQuote, modeLTP.
-         * For getting only last traded price, use modeLTP
-         * For getting last traded price, last traded quantity, average price, volume traded today, total sell quantity and total buy quantity, open, high, low, close, change, use modeQuote
-         * For getting all data with depth, use modeFull*/
-        //tickerProvider.setMode(tokens, KiteTicker.modeLTP);
         
         try {
 			Thread.sleep(10000);
@@ -121,13 +128,9 @@ public class Ticker {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        System.out.println("Got Quote 5");
-        // Unsubscribe for a token.
-        tickerProvider.unsubscribe(tokens);
+        
 
-        // After using com.zerodhatech.com.zerodhatech.ticker, close websocket connection.
-        tickerProvider.disconnect();        
-
+        logger.info("Exiting Ticker.startTicker()");
 		
 	}
 

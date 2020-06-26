@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +41,13 @@ public class AuthenticatorController {
 	@Autowired
 	private Environment env;
 	
+	@Autowired
+	private KafkaTemplate<String, String> kafkaTemplate;
+	
+	@Autowired
+	Ticker ticker;
+	 
+	
 	//@PostMapping(path="/login") // Map ONLY POST Requests
 	@GetMapping(path="/login")
 	public @ResponseBody String login (@RequestParam String request_token
@@ -48,8 +58,7 @@ public class AuthenticatorController {
 		
 		
 		logger.info("Entering /login");
-		SimpleDateFormat dateFormat = new SimpleDateFormat("DD MM YYY - HH:mm:ss");
-		System.out.println("The time is now :" + dateFormat.format(new Date()));
+		
 		if(status.equalsIgnoreCase("success") && accessToken.getAccessToken() == null) {
 			
 			//TODO : Get request token from request parameter to generate session
@@ -57,13 +66,38 @@ public class AuthenticatorController {
 			accessToken.setUser(env.getProperty("zerodha.user.id"));
 			accessToken.setAPISecret(env.getProperty("zerodha.api.secret"));
 			accessToken.generateSession(request_token);
+			
+			logger.info("request_token : "+ request_token);
 		}
+		
+		logger.info("sending 1");
+		String message = "Qubi is best boy";
+		
+		if(kafkaTemplate==null)
+			logger.info("kafkaTemplate == null");
+		
+		ListenableFuture<SendResult<String, String>> future = 
+			      kafkaTemplate.send("luckyv", message);
+		logger.info("sent 1");
+			    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+			 
+			        @Override
+			        public void onSuccess(SendResult<String, String> result) {
+			            System.out.println("Sent message=[" + message + 
+			              "] with offset=[" + result.getRecordMetadata().offset() + "]");
+			        }
+			        @Override
+			        public void onFailure(Throwable ex) {
+			            System.out.println("Unable to send message=["
+			              + message + "] due to : " + ex.getMessage());
+			        }
+			    });
 		  
 		logger.info("Exiting /login");
 		return status;
 	  }
 	
-	@Scheduled(cron="0 0 9 * * MON-FRI")
+	@Scheduled(cron="0 20 15 * * MON-FRI",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void ticker() throws KiteException {
 		
@@ -76,11 +110,12 @@ public class AuthenticatorController {
          * It is recommended to use only one websocket connection at any point of time and make sure you stop connection, once user goes out of app.
          * custom url points to new endpoint which can be used till complete Kite Connect 3 migration is done. */
 		
-		Ticker ticker = new Ticker();
+		//Ticker ticker = new Ticker();
+		
+		
 		ticker.startTicker(accessToken.getAccessToken(), accessToken.getApiKey());
 		
 		logger.info("Exiting ticker() cron");
-		
         
 	}
 

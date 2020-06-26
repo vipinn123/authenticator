@@ -15,7 +15,7 @@ public class SessionAccessToken {
 	private KiteConnect kiteSDK;
 	private String APIKey;
 	private String APISecret;
-	private String AccessToken;
+	private String AccessToken=null;
 	private String UserId;
 	
 	public SessionAccessToken(){
