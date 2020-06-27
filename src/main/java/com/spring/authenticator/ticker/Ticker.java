@@ -8,6 +8,8 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -28,18 +30,27 @@ public class Ticker {
 	
 	private static Logger logger = LoggerFactory.getLogger(Ticker.class);
 	
+	KiteTicker tickerProvider;
+	@Value("${kafka.tick.data.topic}")
+	String topic;
+	
+	
 	public Ticker() {
 		
 	}
 	
 	@Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
-	 
+	
+	
+
 	public void sendMessage(String message) {
 		logger.info("In Ticker.senMessage()");
 		
+		
+		
 		ListenableFuture<SendResult<String, String>> future = 
-			      this.kafkaTemplate.send("luckyv", message);
+			      this.kafkaTemplate.send(topic, message);
 			     
 			    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
 			 
@@ -68,7 +79,7 @@ public class Ticker {
 		/** To get live price use websocket connection.
          * It is recommended to use only one websocket connection at any point of time and make sure you stop connection, once user goes out of app.
          * custom url points to new endpoint which can be used till complete Kite Connect 3 migration is done. */
-        KiteTicker tickerProvider = new KiteTicker(accessToken, apiKey);
+        tickerProvider = new KiteTicker(accessToken, apiKey);
 
         tickerProvider.setOnConnectedListener(new OnConnect() {
             @Override
@@ -131,6 +142,13 @@ public class Ticker {
         
 
         logger.info("Exiting Ticker.startTicker()");
+		
+	}
+	
+	public void stopTicker() throws KiteException {
+		
+		tickerProvider.disconnect();		
+
 		
 	}
 

@@ -97,7 +97,7 @@ public class AuthenticatorController {
 		return status;
 	  }
 	
-	@Scheduled(cron="0 28-30 20 * * MON-FRI",zone="IST")
+	@Scheduled(cron="0 01 13 * * MON-SAT",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void ticker() throws KiteException {
 		
@@ -116,6 +116,28 @@ public class AuthenticatorController {
 		ticker.startTicker(accessToken.getAccessToken(), accessToken.getApiKey());
 		
 		logger.info("Exiting ticker() cron");
+        
+	}
+	
+	@Scheduled(cron="0 03 13 * * MON-SAT",zone="IST")
+	//@Scheduled(fixedRate=5000)
+	public void tickerStop() throws KiteException {
+		
+		logger.info("Entering tickerStop() cron");
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+		System.out.println("The time is now :" + dateFormat.format(new Date()));
+		
+		/** To get live price use websocket connection.
+         * It is recommended to use only one websocket connection at any point of time and make sure you stop connection, once user goes out of app.
+         * custom url points to new endpoint which can be used till complete Kite Connect 3 migration is done. */
+		
+		//Ticker ticker = new Ticker();
+		
+		
+		ticker.stopTicker();
+		
+		logger.info("Exiting tickerStop() cron");
         
 	}
 
