@@ -76,7 +76,7 @@ public class AuthenticatorController {
 		if(kafkaTemplate==null)
 			logger.info("kafkaTemplate == null");
 		
-		ListenableFuture<SendResult<String, String>> future = 
+		/*ListenableFuture<SendResult<String, String>> future = 
 			      kafkaTemplate.send("luckyv", message);
 		logger.info("sent 1");
 			    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
@@ -91,13 +91,13 @@ public class AuthenticatorController {
 			            System.out.println("Unable to send message=["
 			              + message + "] due to : " + ex.getMessage());
 			        }
-			    });
+			    });*/
 		  
 		logger.info("Exiting /login");
 		return status;
 	  }
 	
-	@Scheduled(cron="0 01 13 * * MON-SAT",zone="IST")
+	@Scheduled(cron="0 11 13 * * MON-SAT",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void ticker() throws KiteException {
 		
@@ -119,7 +119,7 @@ public class AuthenticatorController {
         
 	}
 	
-	@Scheduled(cron="0 03 13 * * MON-SAT",zone="IST")
+	@Scheduled(cron="0 13 13 * * MON-SAT",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void tickerStop() throws KiteException {
 		
