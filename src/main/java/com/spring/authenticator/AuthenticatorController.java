@@ -69,35 +69,12 @@ public class AuthenticatorController {
 			
 			logger.info("request_token : "+ request_token);
 		}
-		
-		logger.info("sending 1");
-		String message = "Qubi is best boy";
-		
-		if(kafkaTemplate==null)
-			logger.info("kafkaTemplate == null");
-		
-		/*ListenableFuture<SendResult<String, String>> future = 
-			      kafkaTemplate.send("luckyv", message);
-		logger.info("sent 1");
-			    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
-			 
-			        @Override
-			        public void onSuccess(SendResult<String, String> result) {
-			            System.out.println("Sent message=[" + message + 
-			              "] with offset=[" + result.getRecordMetadata().offset() + "]");
-			        }
-			        @Override
-			        public void onFailure(Throwable ex) {
-			            System.out.println("Unable to send message=["
-			              + message + "] due to : " + ex.getMessage());
-			        }
-			    });*/
-		  
+
 		logger.info("Exiting /login");
 		return status;
 	  }
 	
-	@Scheduled(cron="0 11 13 * * MON-SAT",zone="IST")
+	@Scheduled(cron="0 17 17 * * MON-SAT",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void ticker() throws KiteException {
 		
@@ -119,7 +96,7 @@ public class AuthenticatorController {
         
 	}
 	
-	@Scheduled(cron="0 13 13 * * MON-SAT",zone="IST")
+	@Scheduled(cron="0  18 17 * * MON-SAT",zone="IST")
 	//@Scheduled(fixedRate=5000)
 	public void tickerStop() throws KiteException {
 		

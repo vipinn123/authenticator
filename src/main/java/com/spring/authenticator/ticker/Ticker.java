@@ -107,17 +107,19 @@ public class Ticker {
             public void onTicks(ArrayList<Tick> ticks) {
                 
                 logger.info("Ticks recieved : "+ticks.size());
+                
 
                 if(ticks.size() > 0) {
  
                 	Iterator<Tick> iterator = ticks.iterator();
-                    String tickJson = new Gson().toJson(ticks.get(1));
+                	
+                    String tickJson = new Gson().toJson(ticks.get(0));
                     logger.info(tickJson);
 
                     while(iterator.hasNext()) {
                     	
                     	//Ticker.sendMessage(new Gson().toJson(iterator.next()));
-                    	kafkaTemplate.send("tickdata",new Gson().toJson(iterator.next()));
+                    	kafkaTemplate.send(topic,new Gson().toJson(iterator.next()));
 
                     }
                     		
