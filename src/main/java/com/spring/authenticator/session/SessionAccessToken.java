@@ -68,6 +68,12 @@ public class SessionAccessToken {
 		// TODO Auto-generated method stub
 		return APIKey;
 	}
+
+	public void resetAccessToken() {
+		// TODO Auto-generated method stub
+		this.AccessToken=null;
+		
+	}
 	
 	
 	

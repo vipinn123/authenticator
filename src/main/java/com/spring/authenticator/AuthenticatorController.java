@@ -113,6 +113,7 @@ public class AuthenticatorController {
 		
 		
 		ticker.stopTicker();
+		accessToken.resetAccessToken();
 		
 		logger.info("Exiting tickerStop() cron");
         
