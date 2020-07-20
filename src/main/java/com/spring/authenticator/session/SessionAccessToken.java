@@ -27,7 +27,7 @@ public class SessionAccessToken {
 	
 	public void generateSession(String request_token ) throws JSONException, IOException, KiteException {
 		
-		if(kiteSDK != null)
+		if(kiteSDK != null && AccessToken != null)
 			return;
 		
 		//TODO : Get kiteConnect object, using API Key from Application Context		
@@ -71,7 +71,7 @@ public class SessionAccessToken {
 
 	public void resetAccessToken() {
 		// TODO Auto-generated method stub
-		this.AccessToken=null;
+		this.AccessToken=null;	
 		
 	}
 	
