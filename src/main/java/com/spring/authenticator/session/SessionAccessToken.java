@@ -1,8 +1,19 @@
 package com.spring.authenticator.session;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.zerodhatech.kiteconnect.KiteConnect;
@@ -18,9 +29,13 @@ public class SessionAccessToken {
 	private String AccessToken=null;
 	private String UserId;
 	
+	@Autowired
+	private Environment env;
+	
 	public SessionAccessToken(){
 		
 		//TODO : Initiate kiteSDK with API_Key from app context
+		
 		//
 		
 	}
@@ -38,7 +53,42 @@ public class SessionAccessToken {
 		User user = kiteSDK.generateSession(request_token, APISecret);		
 		this.AccessToken = user.accessToken;
 		kiteSDK.setAccessToken(AccessToken);		
-		System.out.println("Access Token: " + AccessToken);	
+		System.out.println("Access Token: " + AccessToken);
+		
+		//write access token to trader
+		
+		setTraderToken();
+	}
+
+	private void setTraderToken() throws IOException {
+		
+		// TODO Auto-generated method stub
+		URL url = new URL(env.getProperty("trader.api.url")); //Get Trader URL from Properties
+ 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("POST");
+		
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("access_Token", this.AccessToken);
+		
+		con.setDoOutput(true);
+		DataOutputStream out = new DataOutputStream(con.getOutputStream());
+		out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+		out.flush();
+		out.close();
+		
+		
+		
+		/*BufferedReader in = new BufferedReader(
+				  new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer content = new StringBuffer();
+		while ((inputLine = in.readLine()) != null) {
+		    content.append(inputLine);
+		}
+		in.close();*/
+		
+		System.out.println("Response from Trader :" + con.getContent());
+		
 	}
 
 	public void setAPIKey(String APIKey) {
